@@ -1,4 +1,4 @@
-const { AppState } = require('react-native')
+const { AppState, NativeModules, Platform } = require('react-native')
 const { Duplex } = require('streamx')
 const EventEmitter = require('bare-events')
 const { default: NativeBareKit } = require('./specs/NativeBareKit')
@@ -117,7 +117,11 @@ class BareKitWorklet extends EventEmitter {
       throw new TypeError('ID must be a string. Received type ' + typeof id + ' (' + id + ')')
     }
 
-    const { memoryLimit = 0, assets = null } = opts
+    let { memoryLimit = 0, assets = null } = opts
+
+    if (assets === null && Platform.OS === 'android') {
+      assets = NativeModules.BareKitApp?.nativeLibraryDir ?? null
+    }
 
     if (typeof memoryLimit !== 'number') {
       throw new TypeError(

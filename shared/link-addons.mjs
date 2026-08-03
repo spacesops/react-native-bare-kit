@@ -139,6 +139,7 @@ async function writeAndroidPrebuild(prebuildPath, escapedName, version, outPath)
 }
 
 export async function linkAndroidAddons(projectRoot, outDir) {
+  await fs.rm(outDir, { recursive: true, force: true })
   const addons = await discoverAddons(projectRoot)
   const written = []
 

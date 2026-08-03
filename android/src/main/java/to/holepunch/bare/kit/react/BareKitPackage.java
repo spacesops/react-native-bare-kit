@@ -14,6 +14,9 @@ public class BareKitPackage extends BaseReactPackage {
   @Override
   public NativeModule
   getModule(String name, ReactApplicationContext context) {
+    if (BareKitAppModule.NAME.equals(name)) {
+      return new BareKitAppModule(context);
+    }
     return null;
   }
 
@@ -23,6 +26,17 @@ public class BareKitPackage extends BaseReactPackage {
     return () -> {
       Map<String, ReactModuleInfo> map = new HashMap<>();
       map.put(NAME, new ReactModuleInfo(NAME, NAME, false, false, true, true));
+      map.put(
+        BareKitAppModule.NAME,
+        new ReactModuleInfo(
+          BareKitAppModule.NAME,
+          BareKitAppModule.NAME,
+          false,
+          false,
+          false,
+          false
+        )
+      );
       return map;
     };
   }
