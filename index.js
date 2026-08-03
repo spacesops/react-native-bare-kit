@@ -110,6 +110,14 @@ class BareKitWorklet extends EventEmitter {
   static _androidNativeLibraryDir() {
     if (Platform.OS !== 'android') return null
 
+    const legacy = NativeModules.BareKitApp
+    if (legacy) {
+      if (typeof legacy.nativeLibraryDir === 'string') return legacy.nativeLibraryDir
+      const constants =
+        typeof legacy.getConstants === 'function' ? legacy.getConstants() : null
+      if (typeof constants?.nativeLibraryDir === 'string') return constants.nativeLibraryDir
+    }
+
     const turbo = TurboModuleRegistry.get('BareKitApp')
     if (turbo) {
       const constants =
@@ -117,14 +125,6 @@ class BareKitWorklet extends EventEmitter {
       if (typeof constants?.nativeLibraryDir === 'string') {
         return constants.nativeLibraryDir
       }
-    }
-
-    const legacy = NativeModules.BareKitApp
-    if (legacy) {
-      if (typeof legacy.nativeLibraryDir === 'string') return legacy.nativeLibraryDir
-      const constants =
-        typeof legacy.getConstants === 'function' ? legacy.getConstants() : null
-      if (typeof constants?.nativeLibraryDir === 'string') return constants.nativeLibraryDir
     }
 
     return null

@@ -34,7 +34,7 @@ public class BareKitPackage extends BaseReactPackage {
           false,
           true,
           false,
-          true
+          false
         )
       );
       return map;
