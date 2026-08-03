@@ -1,15 +1,15 @@
-# react-native-bare-kit
+# @spacesops/react-native-bare-kit
 
-<https://github.com/holepunchto/bare-kit> for React Native.
+Fork of [holepunchto/react-native-bare-kit](https://github.com/holepunchto/react-native-bare-kit) for Spacesops WDK apps. Based on upstream **v0.11.0**, with custom native addon linking for nested `node_modules` (e.g. `bare-tls`, `bare-tcp`, Electrum/BTC addons) and minimal Android SONAME handling aligned with `@spacesops/pear-wrk-wdk` `--linked` bundles.
 
 ```
-npm i react-native-bare-kit
+npm i @spacesops/react-native-bare-kit
 ```
 
 ## Usage
 
 ```js
-import { Worklet } from 'react-native-bare-kit'
+import { Worklet } from '@spacesops/react-native-bare-kit'
 import b4a from 'b4a'
 
 const worklet = new Worklet()
@@ -32,7 +32,7 @@ IPC.write(b4a.from('Hello from React Native!'))
 Alternatively to load from a bundle:
 
 ```js
-import { Worklet } from 'react-native-bare-kit'
+import { Worklet } from '@spacesops/react-native-bare-kit'
 
 // Bundle output by `bare-pack`
 // Extension can be .bundle, .js, .cjs, .mjs
@@ -50,6 +50,36 @@ Refer to <https://github.com/holepunchto/bare-expo> for an example of using the 
 ### Logging
 
 The `console.*` logging APIs used in the worklet write to the system log using <https://github.com/holepunchto/liblog> with the `bare` identifier. Refer to <https://github.com/holepunchto/liblog#consuming-logs> for instructions on how to consume the logs.
+
+## Native addon linking
+
+On `npm install`, host apps do not need separate relink scripts. Gradle **`preBuild`** runs `android/link.mjs`, which:
+
+- Walks **all** nested `node_modules` for packages with `"addon": true`
+- Copies Android prebuilds to `android/src/main/addons/<abi>/lib<name>.<version>.so` (scoped names use `libscope__pkg.<version>.so`)
+- Applies a **minimal SONAME / RUNPATH** patch (no full `bare-link` ELF rewrite that breaks some layouts)
+
+iOS uses the same addon discovery via `ios/link.mjs`.
+
+## Android packaging (host app)
+
+Release builds that strip JNI debug symbols can corrupt Bare `.so` addons. In the **host app** `android/app/build.gradle`, keep debug symbols for Bare-related libraries:
+
+```groovy
+android {
+  packaging {
+    jniLibs {
+      keepDebugSymbols += [
+        "**/libbare*.so",
+        "**/libbuildonspark__*.so",
+        "**/libsodium-native*.so",
+      ]
+    }
+  }
+}
+```
+
+Expo apps should apply the same via a config plugin (e.g. `@spacesops/wdk-react-native-core`).
 
 ## License
 

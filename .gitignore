@@ -1,3 +1,5 @@
 addons/
+android/.gradle/
 node_modules/
 package-lock.json
+addons-lock.json

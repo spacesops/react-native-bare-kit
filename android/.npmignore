@@ -1,4 +1,5 @@
 .cxx/
+.gradle/
 build/
 addons/
 libc++_shared.so
