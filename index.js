@@ -1,4 +1,4 @@
-const { AppState, NativeModules, Platform } = require('react-native')
+const { AppState, NativeModules, Platform, TurboModuleRegistry } = require('react-native')
 const { Duplex } = require('streamx')
 const EventEmitter = require('bare-events')
 const { default: NativeBareKit } = require('./specs/NativeBareKit')
@@ -107,6 +107,29 @@ class BareKitIPC extends Duplex {
 class BareKitWorklet extends EventEmitter {
   static _worklets = new Set()
 
+  static _androidNativeLibraryDir() {
+    if (Platform.OS !== 'android') return null
+
+    const turbo = TurboModuleRegistry.get('BareKitApp')
+    if (turbo) {
+      const constants =
+        typeof turbo.getConstants === 'function' ? turbo.getConstants() : turbo
+      if (typeof constants?.nativeLibraryDir === 'string') {
+        return constants.nativeLibraryDir
+      }
+    }
+
+    const legacy = NativeModules.BareKitApp
+    if (legacy) {
+      if (typeof legacy.nativeLibraryDir === 'string') return legacy.nativeLibraryDir
+      const constants =
+        typeof legacy.getConstants === 'function' ? legacy.getConstants() : null
+      if (typeof constants?.nativeLibraryDir === 'string') return constants.nativeLibraryDir
+    }
+
+    return null
+  }
+
   constructor(id = null, opts = {}) {
     if (typeof id === 'object' && id !== null) {
       opts = id
@@ -120,7 +143,7 @@ class BareKitWorklet extends EventEmitter {
     let { memoryLimit = 0, assets = null } = opts
 
     if (assets === null && Platform.OS === 'android') {
-      assets = NativeModules.BareKitApp?.nativeLibraryDir ?? null
+      assets = BareKitWorklet._androidNativeLibraryDir()
     }
 
     if (typeof memoryLimit !== 'number') {

@@ -30,11 +30,11 @@ public class BareKitPackage extends BaseReactPackage {
         BareKitAppModule.NAME,
         new ReactModuleInfo(
           BareKitAppModule.NAME,
-          BareKitAppModule.NAME,
+          BareKitAppModule.class.getName(),
           false,
+          true,
           false,
-          false,
-          false
+          true
         )
       );
       return map;

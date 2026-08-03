@@ -2,13 +2,16 @@ package to.holepunch.bare.kit.react;
 
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
+import com.facebook.react.module.annotations.ReactModule;
+import com.facebook.react.turbomodule.core.interfaces.TurboModule;
 import java.util.HashMap;
 import java.util.Map;
 
 /**
  * Exposes Android nativeLibraryDir so linked bare-pack addons can be dlopen'd.
  */
-public class BareKitAppModule extends ReactContextBaseJavaModule {
+@ReactModule(name = BareKitAppModule.NAME)
+public class BareKitAppModule extends ReactContextBaseJavaModule implements TurboModule {
   public static final String NAME = "BareKitApp";
 
   BareKitAppModule(ReactApplicationContext context) {
