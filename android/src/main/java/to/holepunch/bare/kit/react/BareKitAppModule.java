@@ -1,34 +1,19 @@
 package to.holepunch.bare.kit.react;
 
+import com.facebook.proguard.annotations.DoNotStrip;
 import com.facebook.react.bridge.ReactApplicationContext;
-import com.facebook.react.bridge.ReactContextBaseJavaModule;
-import com.facebook.react.module.annotations.ReactModule;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
- * Exposes Android nativeLibraryDir so linked bare-pack addons can be dlopen'd.
+ * Exposes Android nativeLibraryDir for linked bare-pack addons (dlopen from APK lib dir).
  */
-@ReactModule(name = BareKitAppModule.NAME)
-public class BareKitAppModule extends ReactContextBaseJavaModule {
-  public static final String NAME = "BareKitApp";
-
-  BareKitAppModule(ReactApplicationContext context) {
+public class BareKitAppModule extends NativeBareKitAppSpec {
+  public BareKitAppModule(ReactApplicationContext context) {
     super(context);
   }
 
   @Override
-  public String getName() {
-    return NAME;
-  }
-
-  @Override
-  public Map<String, Object> getConstants() {
-    Map<String, Object> constants = new HashMap<>();
-    constants.put(
-      "nativeLibraryDir",
-      getReactApplicationContext().getApplicationInfo().nativeLibraryDir
-    );
-    return constants;
+  @DoNotStrip
+  public String getNativeLibraryDir() {
+    return getReactApplicationContext().getApplicationInfo().nativeLibraryDir;
   }
 }
