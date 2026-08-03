@@ -81,6 +81,18 @@ android {
 
 Expo apps should apply the same via a config plugin (e.g. `@spacesops/wdk-react-native-core`).
 
+## Publishing (maintainers)
+
+Holepunch **`libbare-kit.so`** and **`BareKit.xcframework`** are not stored in this git repo (same as upstream). They are copied from **`react-native-bare-kit@0.11.0`** on npm before pack:
+
+```bash
+npm run sync-native
+npm run verify-pack
+npm publish --access public
+```
+
+`prepack` runs those steps automatically; never publish with `--ignore-scripts`.
+
 ## License
 
 Apache-2.0

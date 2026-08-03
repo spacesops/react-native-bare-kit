@@ -33,6 +33,7 @@ Use on branch **`repackage`** before publishing to [npmjs.org](https://www.npmjs
 - [ ] Update `"description"` / `"author"` for Spacesops maintainership
 - [ ] Keep **`peerDependencies`**: `react`, `react-native` (same as upstream)
 - [ ] `"files"` still includes `android`, `ios`, `shared`, `specs`, podspec, `react-native.config.js`
+- [ ] **`prepack`** runs `scripts/sync-holepunch-native.mjs` (copies `libbare-kit.so`, `classes.jar`, `BareKit.xcframework` from `react-native-bare-kit@0.11.0` — not in git)
 
 ---
 
@@ -110,7 +111,7 @@ From a host app that uses:
 ## 7. Quality gates
 
 - [ ] `npm run test` (prettier check) passes
-- [ ] `npm pack --dry-run` lists `@spacesops/react-native-bare-kit` and expected paths (no `android/.gradle`)
+- [ ] `npm run sync-native` then `npm run verify-pack` (or `npm pack --dry-run`) lists **`libbare-kit.so`** (all ABIs), **`classes.jar`**, **`ios/BareKit.xcframework`** (~300MB+ unpacked; not `android/.gradle`)
 - [ ] Compare addon filenames to names referenced in `@spacesops/pear-wrk-wdk@1.1.1-beta.40` bundle metadata (`linked:lib…`)
 
 ---
@@ -118,8 +119,10 @@ From a host app that uses:
 ## 8. Publish and verify
 
 ```bash
+npm run sync-native
+npm run verify-pack
 npm login
-npm publish --access public
+npm publish --access public   # do not use --ignore-scripts (prepack must run)
 npm view @spacesops/react-native-bare-kit version
 ```
 

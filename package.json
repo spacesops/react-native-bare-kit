@@ -1,6 +1,6 @@
 {
   "name": "@spacesops/react-native-bare-kit",
-  "version": "0.11.0-beta.40",
+  "version": "0.11.0-beta.41",
   "description": "Bare Kit for React Native (Spacesops fork with nested addon linking)",
   "main": "./index.js",
   "types": "./index.d.ts",
@@ -15,7 +15,10 @@
     "specs"
   ],
   "scripts": {
-    "test": "prettier . --check"
+    "test": "prettier . --check",
+    "sync-native": "node scripts/sync-holepunch-native.mjs",
+    "verify-pack": "node scripts/verify-pack-includes-native.mjs",
+    "prepack": "node scripts/sync-holepunch-native.mjs"
   },
   "publishConfig": {
     "access": "public",
