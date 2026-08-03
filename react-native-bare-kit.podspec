@@ -13,7 +13,8 @@ rescue
 end
 
 Pod::Spec.new do |s|
-  s.name = package["name"]
+  # CocoaPods names cannot include npm scope (@spacesops/…); autolinking uses this podspec.
+  s.name = package["name"].include?("/") ? package["name"].split("/").last : package["name"]
   s.version = package["version"]
   s.summary = package["description"]
   s.homepage = package["homepage"]
