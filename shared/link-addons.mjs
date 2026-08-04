@@ -12,6 +12,8 @@ const ANDROID_HOSTS = [
 
 const IOS_TARGETS = ['ios-arm64', 'ios-arm64-simulator', 'ios-x64-simulator']
 
+const ANDROID_HOST_LIBRARY = 'libbare-kit.so'
+
 export function projectRootFromLinkScript(linkDir) {
   const normalized = linkDir.split(path.sep)
   const nodeModulesIndex = normalized.lastIndexOf('node_modules')
@@ -134,6 +136,13 @@ async function writeAndroidPrebuild(prebuildPath, escapedName, version, outPath)
   const runpath = binary.getDynamicEntry(ELF.DynamicEntry.TAG.RUNPATH)
   if (runpath) runpath.runpath = '$ORIGIN'
 
+  // Prebuilds expect the js_*/bare_* symbols to come from the global group, which holds on
+  // the bare CLI but not on Android, where the runtime is a plain DT_NEEDED of the merged
+  // React Native library. Without an explicit dependency dlopen fails on BIND_NOW.
+  if (!binary.getLibrary(ANDROID_HOST_LIBRARY)) {
+    binary.addLibrary(ANDROID_HOST_LIBRARY)
+  }
+
   await fs.mkdir(path.dirname(outPath), { recursive: true })
   binary.toDisk(outPath)
 }
@@ -162,7 +171,8 @@ export async function linkAndroidAddons(projectRoot, outDir) {
         await fs.copyFile(prebuild, outPath)
         written.push(outPath)
         console.warn(
-          `WARN: SONAME patch failed for ${pkg.name} (${arch}); copied raw prebuild:`,
+          `WARN: SONAME patch failed for ${pkg.name} (${arch}); copied raw prebuild, which will` +
+            ' fail to dlopen at runtime:',
           err.message
         )
       }
