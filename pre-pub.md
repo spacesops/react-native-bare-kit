@@ -54,6 +54,7 @@ import link from 'bare-link'
   - Naming: `@scope/pkg` → `libscope__pkg.<version>.so` (match starter relink script)
 - [ ] **Do not** use full `bare-link` / bare-lief rewrite if it breaks bare-kit loader (`strtab out of bounds`)
 - [ ] Apply **minimal SONAME fix** so runtime lookup matches pear bundle `linked:libbare-tls.*.so` names
+- [ ] **`UPSTREAM_VERSION`** in `scripts/sync-holepunch-native.mjs` must export every `js_*` symbol the current `bare-*` prebuilds reference (`js_get_function_id`, `js_enable_garbage_collection_tracking`, …) and must **not** add `NEEDED libnativehelper.so` (0.15.x does — it breaks `libappmodules.so` loading and all TurboModules)
 - [ ] Add **`NEEDED libbare-kit.so`** to every patched addon — prebuilds expect `js_*` / `bare_*` from the linker's global group, which Android does not provide, so a raw copy always fails `dlopen` with `cannot locate symbol "js_create_function"` (surfaces as `ADDON_NOT_FOUND` in wallet creation). `RTLD_GLOBAL` is not a substitute.
 - [ ] Targets: `android-arm64`, `android-arm`, `android-ia32`, `android-x64` → `arm64-v8a`, `armeabi-v7a`, `x86`, `x86_64`
 - [ ] `android/build.gradle`: `preBuild.dependsOn link` runs `node link.mjs` with cwd `android/` (unchanged pattern OK if script path is correct)
@@ -155,6 +156,7 @@ npm view @spacesops/react-native-bare-kit version
 | Nested `node_modules` addon scan                     |       |       |
 | SONAME matches pear `--linked` names                 |       |       |
 | Addons carry `NEEDED libbare-kit.so`                 |       |       |
+| All addons pass on-device `dlopen` sweep             |       |       |
 | E2E wallet create + bitcoin on device                |       |       |
 | Published to npm                                     |       |       |
 

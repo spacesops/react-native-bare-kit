@@ -10,7 +10,13 @@ import os from 'os'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
-const UPSTREAM_VERSION = '0.11.0'
+// Must be new enough to export the js_* symbols the bare-* addon prebuilds link against
+// (e.g. js_get_function_id for bare-module 6.4, js_enable_garbage_collection_tracking for
+// bare-performance 2.1). Too old and every addon fails dlopen as ADDON_NOT_FOUND.
+//
+// Do not move to 0.15.x: it adds NEEDED libnativehelper.so, which app linker namespaces
+// cannot resolve, so libappmodules.so fails to load and every TurboModule disappears.
+const UPSTREAM_VERSION = '0.14.5'
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const packageRoot = path.join(__dirname, '..')
 
