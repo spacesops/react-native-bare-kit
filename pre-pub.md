@@ -33,6 +33,7 @@ Use on branch **`repackage`** before publishing to [npmjs.org](https://www.npmjs
 - [ ] Update `"description"` / `"author"` for Spacesops maintainership
 - [ ] Keep **`peerDependencies`**: `react`, `react-native` (same as upstream)
 - [ ] `"files"` still includes `android`, `ios`, `shared`, `specs`, podspec, `react-native.config.js`
+- [ ] `"files"` includes **`app.plugin.js`** and **`TROUBLESHOOTING.md`**. Omitting the plugin breaks Expo consumers only in **release** builds (addons get stripped), so nothing catches it earlier: `npm pack --dry-run | rg app.plugin.js`
 - [ ] **`prepack`** runs `scripts/sync-holepunch-native.mjs` (copies `libbare-kit.so`, `classes.jar`, `BareKit.xcframework` from `react-native-bare-kit@0.11.0` — not in git)
 
 ---

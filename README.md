@@ -63,27 +63,36 @@ iOS uses the same addon discovery via `ios/link.mjs`.
 
 ## Android packaging (host app)
 
-Release builds that strip JNI debug symbols can corrupt Bare `.so` addons. In the **host app** `android/app/build.gradle`, keep debug symbols for Bare-related libraries:
+Addons are `dlopen`ed by filename and the loader reads their symbol tables directly, so **stripping JNI debug symbols corrupts them**. Because only some builds strip, this typically fails in release only, and surfaces as `ADDON_NOT_FOUND` with a truncated `dlopen` cause.
+
+Expo apps get this from the bundled config plugin — add it to `app.json`:
+
+```json
+{ "expo": { "plugins": ["@spacesops/react-native-bare-kit"] } }
+```
+
+The plugin derives the pattern list by discovering every `"addon": true` package in the tree, the same way `link.mjs` does, so it stays correct as addons come and go. Do not hand-maintain a list of prefixes: `libudx-native` is a real counter-example that a `libbare*` glob silently misses. Pass `extraJniLibPatterns` if you have addons the discovery cannot see.
+
+Consumers of `@spacesops/wdk-react-native-core` do not need this entry — its plugin applies this one.
+
+Bare React Native apps without Expo config plugins should keep the equivalent in `android/app/build.gradle`:
 
 ```groovy
 android {
   packaging {
     jniLibs {
-      keepDebugSymbols += [
-        "**/libbare*.so",
-        "**/libbuildonspark__*.so",
-        "**/libsodium-native*.so",
-      ]
+      // every addon, plus the runtime itself
+      keepDebugSymbols += ["**/libbare*.so", "**/libsodium-native.*.so", "**/libudx-native.*.so"]
     }
   }
 }
 ```
 
-Expo apps should apply the same via a config plugin (e.g. `@spacesops/wdk-react-native-core`).
+See **[TROUBLESHOOTING.md](./TROUBLESHOOTING.md)** when addons fail to load.
 
 ## Publishing (maintainers)
 
-Holepunch **`libbare-kit.so`** and **`BareKit.xcframework`** are not stored in this git repo (same as upstream). They are copied from **`react-native-bare-kit@0.11.0`** on npm before pack:
+Holepunch **`libbare-kit.so`** and **`BareKit.xcframework`** are not stored in this git repo (same as upstream). They are copied from the upstream **`react-native-bare-kit`** version pinned in `scripts/sync-holepunch-native.mjs` (currently **0.14.5**; do not raise it to 0.15.x — see [TROUBLESHOOTING.md](./TROUBLESHOOTING.md)) before pack:
 
 ```bash
 npm run sync-native
