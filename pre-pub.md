@@ -53,7 +53,8 @@ import link from 'bare-link'
 - [ ] For each addon + ABI, copy **`prebuilds/<host>/*.bare`** → **`android/src/main/addons/<arch>/lib<escapedName>.<version>.so`**
   - Naming: `@scope/pkg` → `libscope__pkg.<version>.so` (match starter relink script)
 - [ ] **Do not** use full `bare-link` / bare-lief rewrite if it breaks bare-kit loader (`strtab out of bounds`)
-- [ ] Apply **minimal SONAME fix** so runtime lookup matches pear bundle `linked:libbare-tls.*.so` names (raw copy alone caused `ADDON_NOT_FOUND` in wallet creation)
+- [ ] Apply **minimal SONAME fix** so runtime lookup matches pear bundle `linked:libbare-tls.*.so` names
+- [ ] Add **`NEEDED libbare-kit.so`** to every patched addon — prebuilds expect `js_*` / `bare_*` from the linker's global group, which Android does not provide, so a raw copy always fails `dlopen` with `cannot locate symbol "js_create_function"` (surfaces as `ADDON_NOT_FOUND` in wallet creation). `RTLD_GLOBAL` is not a substitute.
 - [ ] Targets: `android-arm64`, `android-arm`, `android-ia32`, `android-x64` → `arm64-v8a`, `armeabi-v7a`, `x86`, `x86_64`
 - [ ] `android/build.gradle`: `preBuild.dependsOn link` runs `node link.mjs` with cwd `android/` (unchanged pattern OK if script path is correct)
 - [ ] Optional: emit **`addons-lock.json`** at app root or in package for CI diffing
@@ -153,6 +154,7 @@ npm view @spacesops/react-native-bare-kit version
 | iOS `link.mjs` updated                               |       |       |
 | Nested `node_modules` addon scan                     |       |       |
 | SONAME matches pear `--linked` names                 |       |       |
+| Addons carry `NEEDED libbare-kit.so`                 |       |       |
 | E2E wallet create + bitcoin on device                |       |       |
 | Published to npm                                     |       |       |
 
